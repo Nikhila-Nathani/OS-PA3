@@ -9,8 +9,29 @@
  * init_bsm- initialize bsm_tab
  *-------------------------------------------------------------------------
  */
+
+/* initializing the array of backing stores */
+ bs_map_t bsm_tab[NBSM];    /* declared in paging.h */
+
 SYSCALL init_bsm()
 {
+    STATWORD ps;
+    disable(ps);
+    
+    int i;
+    for(i=0; i<NBSM; i++){
+        bsm_tab[i].bs_status = BSM_UNMAPPED;
+        int j;
+        /* initializing for all processes */
+	    for(j = 0; j < 50; j++){
+            bsm_tab[i].bs_pid[j] = 0;
+            bsm_tab[i].bs_vpno[j] = -1; 
+            bsm_tab[i].bs_npages[j] = 0;
+	    }	
+	    bsm_tab[i].bs_sem = 0;
+    }
+    restore(ps);
+    return OK;
 }
 
 /*-------------------------------------------------------------------------
@@ -19,6 +40,21 @@ SYSCALL init_bsm()
  */
 SYSCALL get_bsm(int* avail)
 {
+    STATWORD ps;
+    disable(ps);
+    *avail = 0;
+
+    int i;
+    for(i=0; i<NBSM; i++){
+        if(bsm_tab[i].bs_status = BSM_UNMAPPED){
+            *avail = i;
+            restore(ps);
+            return OK;
+        }
+    }
+    restore(ps);
+    /* if there is no unmapped backing store available, then it should return error */
+    return SYSERR;
 }
 
 
@@ -28,6 +64,27 @@ SYSCALL get_bsm(int* avail)
  */
 SYSCALL free_bsm(int i)
 {
+    STATWORD ps;
+    disable(ps);
+    /* check if bsid is bad or not */
+    if(i<0 || i>=NBSM){
+        restore(ps);
+        return SYSERR;
+    }
+
+    /* initialize or reset all values to 0 or original values */\
+    bsm_tab[i].bs_status = BSM_UNMAPPED;
+    int j;
+    /* initializing for all processes */
+    for(j = 0; j < 50; j++){
+        bsm_tab[i].bs_pid[j] = 0;
+        bsm_tab[i].bs_vpno[j] = -1; 
+        bsm_tab[i].bs_npages[j] = 0;
+    }	
+    bsm_tab[i].bs_sem = 0;
+
+    restore(ps);
+    return OK;
 }
 
 /*-------------------------------------------------------------------------

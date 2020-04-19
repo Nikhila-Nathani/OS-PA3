@@ -44,16 +44,16 @@ typedef struct{
 
 typedef struct{
   int bs_status;			/* MAPPED or UNMAPPED		*/
-  int bs_pid;				/* process id using this slot   */
-  int bs_vpno;				/* starting virtual page number */
-  int bs_npages;			/* number of pages in the store */
+  int bs_pid[50];				/* process id using this slot  - extending the variable to all the processes */
+  int bs_vpno[50];				/* starting virtual page number - extending the variable to all the processes */
+  int bs_npages[50];			/* number of pages in the store - extending the variable to all the processes */
   int bs_sem;				/* semaphore mechanism ?	*/
 } bs_map_t;
 
 typedef struct{
   int fr_status;			/* MAPPED or UNMAPPED		*/
-  int fr_pid;				/* process id using this frame  */
-  int fr_vpno;				/* corresponding virtual page no*/
+  int fr_pid[50];				/* process id using this frame - extending the variable to all the processes */
+  int fr_vpno[50];				/* corresponding virtual page no - extending the variable to all the processes*/
   int fr_refcnt;			/* reference count		*/
   int fr_type;				/* FR_DIR, FR_TBL, FR_PAGE	*/
   int fr_dirty;
@@ -73,8 +73,10 @@ SYSCALL read_bs(char *, bsd_t, int);
 SYSCALL write_bs(char *, bsd_t, int);
 
 #define NBPG		4096	/* number of bytes per page	*/
-#define FRAME0		1024	/* zero-th frame		*/
+#define FRAME0    1024	/* zero-th frame		*/
 #define NFRAMES 	1024	/* number of frames		*/
+#define NBSM    16  /* number of backing stores */
+#define F_ENTRY   1024  /* number of frame entries  */   
 
 #define BSM_UNMAPPED	0
 #define BSM_MAPPED	1
@@ -90,4 +92,4 @@ SYSCALL write_bs(char *, bsd_t, int);
 #define FIFO 4
 
 #define BACKING_STORE_BASE	0x00800000
-#define BACKING_STORE_UNIT_SIZE 0x00100000
+#define BACKING_STORE_UNIT_SIZE 0x00080000  /* this is to be changed as each backing store has 128 pages: 128 * 4 kb = 524288 bytes */
