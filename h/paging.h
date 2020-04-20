@@ -44,16 +44,17 @@ typedef struct{
 
 typedef struct{
   int bs_status;			/* MAPPED or UNMAPPED		*/
-  int bs_pid[50];				/* process id using this slot  - extending the variable to all the processes */
-  int bs_vpno[50];				/* starting virtual page number - extending the variable to all the processes */
-  int bs_npages[50];			/* number of pages in the store - extending the variable to all the processes */
+  int bs_pid[NPROC];				/* process id using this slot  - extending the variable to all the processes */
+  int bs_vpno[NPROC];				/* starting virtual page number - extending the variable to all the processes */
+  int bs_npages[NPROC];			/* number of pages in the store - extending the variable to all the processes */
   int bs_sem;				/* semaphore mechanism ?	*/
+  int proc_cnt;     /* total number of processes holding this backing store */
 } bs_map_t;
 
 typedef struct{
   int fr_status;			/* MAPPED or UNMAPPED		*/
-  int fr_pid[50];				/* process id using this frame - extending the variable to all the processes */
-  int fr_vpno[50];				/* corresponding virtual page no - extending the variable to all the processes*/
+  int fr_pid[NPROC];				/* process id using this frame - extending the variable to all the processes */
+  int fr_vpno[NPROC];				/* corresponding virtual page no - extending the variable to all the processes*/
   int fr_refcnt;			/* reference count		*/
   int fr_type;				/* FR_DIR, FR_TBL, FR_PAGE	*/
   int fr_dirty;

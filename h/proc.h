@@ -76,6 +76,7 @@ struct	pentry	{
         int     store;                  /* backing store for vheap      */
         int     vhpno;                  /* starting pageno for vheap    */
         int     vhpnpages;              /* vheap size                   */
+		int 	bs_to_proc[16];			/* array that stores to which process the backing store is mapped to*/
         struct mblock *vmemlist;        /* vheap list              	*/
 };
 

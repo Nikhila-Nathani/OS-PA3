@@ -93,6 +93,28 @@ SYSCALL free_bsm(int i)
  */
 SYSCALL bsm_lookup(int pid, long vaddr, int* store, int* pageth)
 {
+    STATWORD  ps;
+    disable(ps);
+
+    unsigned long vpno = vaddr/NBPG ;
+    int i;
+    for(i = 0; i < NBSM; i++){
+        /* max range is the vpno or bs plus the npages */
+        int max_range = bsm_tab[i].bs_vpno[pid] + bsm_tab[i].bs_npages[pid];
+        if(vpno >= bsm_tab[i].bs_vpno[pid] && vpno < max_range){
+            /* if the process exists in that bs */
+            if(bsm_tab[i].bs_pid[pid] == 1){
+                /* set the pageth and store variables */
+                *pageth = vpno - bsm_tab[i].bs_vpno[pid];
+                *store = i;
+                restore(ps);
+                return OK;
+            }
+        }
+    }
+
+    restore(ps);
+    return SYSERR;
 }
 
 
@@ -102,6 +124,27 @@ SYSCALL bsm_lookup(int pid, long vaddr, int* store, int* pageth)
  */
 SYSCALL bsm_map(int pid, int vpno, int source, int npages)
 {
+    STATWORD  ps;
+    disable(ps);
+    /* source is the backing store number  */
+    /* check if the npages are valid and source to map is valid */
+    if((source < 0 || source >= NBSM) || (npages <= 0 || npages > 128)){
+        restore(ps);
+        return SYSERR;
+    }
+    /* map the process to the variables of bsm_tab */
+    bsm_tab[source].bs_status = BSM_MAPPED;
+	bsm_tab[source].bs_pid[pid] = 1;
+    bsm_tab[source].bs_vpno[pid] = vpno;
+	bsm_tab[source].bs_npages[pid] = npages;
+	bsm_tab[source].proc_cnt = 1;
+    
+    /* map the process variables with the bs variables */
+    proctab[pid].bs_to_proc[source] = 1;
+    proctab[pid].store = source;
+
+    restore(ps);
+    return OK;
 }
 
 
@@ -112,6 +155,26 @@ SYSCALL bsm_map(int pid, int vpno, int source, int npages)
  */
 SYSCALL bsm_unmap(int pid, int vpno, int flag)
 {
+    STATWORD ps;
+    disable(ps);
+
+    /* check if unmapped */
+    if(bsm_tab[bs_id].bs_status == BSM_UNMAPPED){
+        restore(ps);
+        return SYSERR;
+	}
+
+    /* check with lookup */
+    int store, pageth;
+    if(bsm_lookup(pid, vpno*4096, &store, &pageth)==SYSERR){
+		restore(ps);
+		return SYSERR;
+	}
+
+    
+    restore(ps);
+    return OK;
+
 }
 
 
