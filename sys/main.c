@@ -80,12 +80,6 @@ int main() {
 	int pid1;
 	int pid2;
 
-	
-	unsigned long vpno = (PROC1_VADDR&0xfffff000)>>12;
-
-	//kprintf("\n coded: %d : actual-%d",vpno, PROC1_VADDR/NBPG);
-	//kprintf("\n NPROC: %d",NPROC);
-
 	kprintf("\n1: shared memory\n");
 	pid1 = create(proc1_test1, 2000, 20, "proc1_test1", 0, NULL);
 	resume(pid1);

@@ -159,7 +159,7 @@ SYSCALL bsm_unmap(int pid, int vpno, int flag)
     disable(ps);
 
     /* check if unmapped */
-    if(bsm_tab[bs_id].bs_status == BSM_UNMAPPED){
+    if(bsm_tab[pid].bs_status == BSM_UNMAPPED){
         restore(ps);
         return SYSERR;
 	}
@@ -171,7 +171,7 @@ SYSCALL bsm_unmap(int pid, int vpno, int flag)
 		return SYSERR;
 	}
 
-    
+
     restore(ps);
     return OK;
 

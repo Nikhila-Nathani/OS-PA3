@@ -77,6 +77,7 @@ SYSCALL get_frm(int* avail)
 	for(i = 0; i < NFRAMES; i++){
 		if(frm_tab[i].fr_status == FRM_UNMAPPED){
 		  *avail = i;
+      restore(ps);
       return OK;
 		}
 	}
