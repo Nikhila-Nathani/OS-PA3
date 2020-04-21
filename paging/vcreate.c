@@ -28,7 +28,22 @@ SYSCALL vcreate(procaddr,ssize,hsize,priority,name,nargs,args)
 	long	args;			/* arguments (treated like an	*/
 					/* array in the code)		*/
 {
-	kprintf("To be implemented!\n");
+	STATWORD ps;
+	disable(ps);
+
+	/* verify hsize is within range or 0 to 128*/
+	if(hsize <= 0 || hsize > 128 ){
+		restore(ps);
+		return SYSERR;
+	}
+
+	/* get one of the unmapped backing stores */
+	int bsid = 0;
+	if(get_bsm(&bsid) == SYSERR){
+		restore(ps);
+		return SYSERR;
+	}
+
 	return OK;
 }
 

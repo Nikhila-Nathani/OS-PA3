@@ -12,7 +12,13 @@
  */
 SYSCALL xmmap(int virtpage, bsd_t source, int npages)
 {
-  kprintf("xmmap - to be implemented!\n");
+  STATWORD ps;
+	disable(ps);
+	
+	if(bsm_tab[source].bs_status== BSM_UNMAPPED){
+		restore(ps);
+		return SYSERR;
+	}
   return SYSERR;
 }
 
@@ -24,6 +30,9 @@ SYSCALL xmmap(int virtpage, bsd_t source, int npages)
  */
 SYSCALL xmunmap(int virtpage)
 {
-  kprintf("To be implemented!");
-  return SYSERR;
+  /* xm unmap fucntions the same as bs_unmap */
+  if(bsm_unmap(currpid, (virtpage), 0)!=OK){
+	  return SYSERR;
+  }
+  return OK;
 }

@@ -158,6 +158,12 @@ SYSCALL bsm_unmap(int pid, int vpno, int flag)
     STATWORD ps;
     disable(ps);
 
+    /* check if its a bad process or not  */
+    if(isbadpid(pid)){
+        restore(ps);
+        return SYSERR;
+    }
+
     /* check if unmapped */
     if(bsm_tab[pid].bs_status == BSM_UNMAPPED){
         restore(ps);
@@ -171,7 +177,7 @@ SYSCALL bsm_unmap(int pid, int vpno, int flag)
 		return SYSERR;
 	}
 
-
+    int vpno_;
     restore(ps);
     return OK;
 
