@@ -41,9 +41,20 @@ SYSCALL vcreate(procaddr,ssize,hsize,priority,name,nargs,args)
 	int bsid = 0;
 	if(get_bsm(&bsid) == SYSERR){
 		restore(ps);
+		return SYSERR; 
+	}
+
+	/* create the process and then map it to a bs */
+	if(bsm_map(create(procaddr,ssize,priority,name,nargs,args), 4096, bs_id, hsize) == SYSERR){
+		restore(ps);
 		return SYSERR;
 	}
 
+	/* update all the variable in proc struc and the bsm_tab */
+	
+	
+	restore(ps);
+	/* return true if creation of proc is successful */
 	return OK;
 }
 
