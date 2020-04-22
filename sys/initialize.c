@@ -129,6 +129,8 @@ sysinit()
 {
 	static	long	currsp;
 	int	i,j;
+	int fr_no = 0;
+	pt_t *pd_ptr;
 	struct	pentry	*pptr;
 	struct	sentry	*sptr;
 	struct	mblock	*mptr;
@@ -210,6 +212,44 @@ sysinit()
 
 	rdytail = 1 + (rdyhead=newqueue());/* initialize ready list */
 
+	init_frm();		/* initialize all the frames */	
+	init_bsm();		/* initialize all the backing stores */	
+	
+	/* create the global page tables	*/
+	for(i = 0; i < 4; i++){		
+
+		get_frm(&fr_no);
+		pd_ptr = ((FRAME0+i)*NBPG);
+		
+		/* initialize the frame variable for NULLPROC	*/
+		
+		frm_tab[fr_no].fr_type = FR_TBL;
+		frm_tab[fr_no].fr_pid[currpid] = 0;	
+		frm_tab[fr_no].fr_status = FRM_MAPPED;
+		
+		int j;
+		for(j = 0; j < F_ENTRY ; j++){	
+
+			pd_ptr->pt_pres = 1;
+			pd_ptr->pt_write = 1;
+			pd_ptr->pt_user = 1;
+			pd_ptr->pt_pwt = 1;
+			pd_ptr->pt_pcd = 0;
+			pd_ptr->pt_acc = 0;
+			pd_ptr->pt_dirty = 0;
+			pd_ptr->pt_mbz = 0;
+			pd_ptr->pt_global = 1;
+			pd_ptr->pt_avail = 0;
+			pd_ptr->pt_base = ((i*FRAME0)+j);
+
+			pd_ptr++;
+		}
+	}
+
+	//set_evec(14,(u_long)pfintr);	/* handle the page fault interrupt	 */
+	initPageDirectory(NULLPROC);		/* create page directory */
+	//write_cr3(proctab[NULLPROC].pdbr);
+	//enable_paging();
 
 	return(OK);
 }
