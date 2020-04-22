@@ -223,8 +223,9 @@ SYSCALL bsm_unmap(int pid, int vpno, int flag)
 	bsm_tab[store].bs_vpno[pid] = 4096;
 
     if( proctab[pid].bs_to_proc[store] == 1){
-        proctab[pid].bs_to_proc[store] = 0;
+        
         bsm_tab[store].proc_cnt--;
+        proctab[pid].bs_to_proc[store] = 0;
     }
 
     /* check if no process uses that bs */
