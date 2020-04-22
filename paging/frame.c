@@ -134,4 +134,57 @@ SYSCALL free_frm(int i)
 }
 
 
+/* initialize page directory */
+
+void initPageDirectory(int pid){
+
+	STATWORD ps;
+	disable(ps);
+
+  pd_t *pgdir;
+	
+  int fr_no =0;
+  /* create the initial PD in frame 0  */
+	get_frm(&fr_no);
+  
+  /* set the PDBR and frame variables  */
+  frm_tab[fr_no].fr_status = FRM_MAPPED;
+	frm_tab[fr_no].fr_type = FR_DIR;
+  frm_tab[fr_no].fr_pid[pid] = 1;
+
+	proctab[pid].pdbr = (FRAME0+fr_no)*NBPG;	
+	
+	int i;
+	pgdir = (pd_t *)proctab[pid].pdbr;
+  /* initialize PD for every frame */
+	for(i = 0; i < NFRAMES ; i++){
+
+		pgdir->pd_pres = 0;
+		pgdir->pd_write = 0;
+		pgdir->pd_user = 0;
+		pgdir->pd_pwt = 0;
+		pgdir->pd_pcd = 0;
+		pgdir->pd_acc = 0;
+		pgdir->pd_mbz = 0;
+		pgdir->pd_fmb = 0;
+		pgdir->pd_global = 0;
+		pgdir->pd_avail = 0;
+		pgdir->pd_base = 0;
+		
+    /* if the frame number contains global page table */
+		if(i<4){
+
+      pgdir->pd_base = ((FRAME0+i));
+      pgdir->pd_write = 1;
+			pgdir->pd_pres = 1;
+			
+		}
+		pgdir++;
+	}
+
+	restore(ps);
+	return OK;
+}
+
+
 
