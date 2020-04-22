@@ -24,9 +24,34 @@ int get_bs(bsd_t bs_id, unsigned int npages) {
 			restore(ps);
 			return SYSERR;
 		}
+    bsm_tab[bs_id].shared_pages = npages;
 
     restore(ps);
     return npages;
+  }
+
+  if(bsm_tab[bs_id].bs_status == BSM_MAPPED){
+    /* if the backing store is private */
+    if(bsm_tab[bs_id].priv_bs){
+      restore(ps);
+      return SYSERR;
+    }
+  }
+
+  if(bsm_tab[bs_id].shared_pages < npages ){
+    retore(ps);
+    return bsm_tab[bs_id].shared_pages;
+  }
+  /* add process to shared backing store  */
+  else{
+   
+    bsm_tab[bs_id].bs_vpno[currpid] = 4096;
+    bsm_tab[bs_id].bs_pid[currpid] = 1;
+		bsm_tab[bs_id].bs_npages[currpid] = npages; 
+    bsm_tab[bs_id].proc_cnt++;
+		
+		restore(ps);
+    return bsm_tab[bs_id].shared_pages;
   }
 
 }
