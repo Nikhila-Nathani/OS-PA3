@@ -77,7 +77,8 @@ struct	pentry	{
         int     vhpno;                  /* starting pageno for vheap    */
         int     vhpnpages;              /* vheap size                   */
 		int 	bs_to_proc[16];			/* array that stores to which process the backing store is mapped to*/
-        struct mblock *vmemlist;        /* vheap list              	*/
+        int		priv_heap;				/* is 1 if its a private heap or else 0 if it is shared	*/
+		struct mblock *vmemlist;        /* vheap list              	*/
 };
 
 

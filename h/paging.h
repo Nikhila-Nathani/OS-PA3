@@ -22,7 +22,6 @@ typedef struct {
 /* Structure for a page table entry */
 
 typedef struct {
-
   unsigned int pt_pres	: 1;		/* page is present?		*/
   unsigned int pt_write : 1;		/* page is writable?		*/
   unsigned int pt_user	: 1;		/* is use level protection?	*/
@@ -49,6 +48,8 @@ typedef struct{
   int bs_npages[NPROC];			/* number of pages in the store - extending the variable to all the processes */
   int bs_sem;				/* semaphore mechanism ?	*/
   int proc_cnt;     /* total number of processes holding this backing store */
+  int priv_bs;      /* is 1 if its a private bs or else its 0 if its shared bs   */
+  int shared_pages; /* the total number of shared pages in the bs   */
 } bs_map_t;
 
 typedef struct{

@@ -29,6 +29,9 @@ SYSCALL init_bsm()
             bsm_tab[i].bs_npages[j] = 0;
 	    }	
 	    bsm_tab[i].bs_sem = 0;
+        bsm_tab[i].priv_bs = 0;
+        bsm_tab[i].proc_cnt = 0;
+
     }
     restore(ps);
     return OK;
@@ -82,6 +85,8 @@ SYSCALL free_bsm(int i)
         bsm_tab[i].bs_npages[j] = 0;
     }	
     bsm_tab[i].bs_sem = 0;
+    bsm_tab[i].priv_bs = 0;
+    bsm_tab[i].proc_cnt = 0;
 
     restore(ps);
     return OK;
@@ -158,6 +163,11 @@ SYSCALL bsm_unmap(int pid, int vpno, int flag)
     STATWORD ps;
     disable(ps);
 
+    unsigned long vaddr;
+	pd_t *pd_off;
+	pt_t *pt_off;
+
+
     /* check if its a bad process or not  */
     if(isbadpid(pid)){
         restore(ps);
@@ -177,7 +187,51 @@ SYSCALL bsm_unmap(int pid, int vpno, int flag)
 		return SYSERR;
 	}
 
-    int vpno_;
+    /* unmapping of pages from frame and move to bs */
+    int i;
+    int bs_pages = bsm_tab[store].bs_npages[pid];
+    int next = bsm_tab[store].bs_vpno[pid];
+    for(i = 0; i < bs_pages; i++){
+        
+        vaddr = (next)*NBPG; 
+        
+        int pd_range = (vaddr>>22)*4; /* the page directory which is the last 10 bits of vaddr multiplied by the 4 byte frame entry   */
+        pd_off = (proctab[currpid].pdbr)+ pd_range;
+        
+        int pt_range = ((vaddr&(0x0003ff000))>>12)*sizeof(pd_t); /* the 10 bits representing page table in vaddr - 12 to 21 */
+        pt_off = (pd_off->pd_base*4096) + pt_range;
+
+        if(pt_off->pt_pres == 1 && pd_off->pd_pres == 1){
+
+            if(frm_tab[pt_off->pt_base - 1024].fr_status == FRM_MAPPED){
+
+                /* if the frame is mapped, then move the page table to bs   */
+                write_bs(pt_off->pt_base * 4096, store, pageth);
+
+               // delete_from_sc_q(pt_off->pt_base - FRAME0);
+
+                /* free the frame   */
+                free_frm(pt_off->pt_base - FRAME0);
+            }
+        }
+        next++;
+    }
+    
+    /* updating process and bs variables after unmap  - reinitializing  */
+    bsm_tab[store].bs_pid[pid] = 0;
+	bsm_tab[store].bs_npages[pid] = 0;
+	bsm_tab[store].bs_vpno[pid] = 4096;
+
+    if( proctab[pid].bs_to_proc[store] == 1){
+        proctab[pid].bs_to_proc[store] = 0;
+        bsm_tab[store].proc_cnt--;
+    }
+
+    /* check if no process uses that bs */
+    if(bsm_tab[store].proc_cnt == 0){
+		free_bsm(store);
+	}
+
     restore(ps);
     return OK;
 

@@ -31,6 +31,8 @@ SYSCALL vcreate(procaddr,ssize,hsize,priority,name,nargs,args)
 	STATWORD ps;
 	disable(ps);
 
+	int bsid = 0;
+	int pid;
 	/* verify hsize is within range or 0 to 128*/
 	if(hsize <= 0 || hsize > 128 ){
 		restore(ps);
@@ -38,24 +40,38 @@ SYSCALL vcreate(procaddr,ssize,hsize,priority,name,nargs,args)
 	}
 
 	/* get one of the unmapped backing stores */
-	int bsid = 0;
 	if(get_bsm(&bsid) == SYSERR){
 		restore(ps);
 		return SYSERR; 
 	}
 
 	/* create the process and then map it to a bs */
-	if(bsm_map(create(procaddr,ssize,priority,name,nargs,args), 4096, bs_id, hsize) == SYSERR){
+	pid = create(procaddr,ssize,priority,name,nargs,args);
+	if(bsm_map(pid, 4096, bsid, hsize) == SYSERR){
 		restore(ps);
 		return SYSERR;
 	}
+	else{
 
-	/* update all the variable in proc struc and the bsm_tab */
-	
-	
+		/* update all the variable in proc struc and the bsm_tab 	*/
+		proctab[pid].store = bsid;
+		proctab[pid].vhpno = 4096;
+		proctab[pid].vhpnpages = hsize; /* the virtal heap has hsize number of pages	*/
+		proctab[pid].bs_to_proc[bsid] = 1;		
+		proctab[pid].priv_heap = 1;	
+
+		bsm_tab[bsid].priv_bs = 1;
+
+		struct mblock *vmemlist; 
+		
+
+		restore(ps);
+		/* return true if creation of proc is successful */
+		return pid;
+	}
+
 	restore(ps);
-	/* return true if creation of proc is successful */
-	return OK;
+	return SYSERR;
 }
 
 /*------------------------------------------------------------------------
