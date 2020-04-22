@@ -68,9 +68,9 @@ SYSCALL vcreate(procaddr,ssize,hsize,priority,name,nargs,args)
 		proctab[p_id].vmemlist->mnext = 4096 * 4096;
 
 		vheaplist = BACKING_STORE_BASE + (bs_id * BACKING_STORE_UNIT_SIZE);
-		vheaplist->mnext = NULL;
-		vheaplist->mlen = hsize*NBPG;
 		
+		vheaplist->mlen = hsize*NBPG;
+		vheaplist->mnext = NULL;
 		
 
 		restore(ps);

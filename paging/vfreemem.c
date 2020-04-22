@@ -14,6 +14,43 @@ SYSCALL	vfreemem(block, size)
 	struct	mblock	*block;
 	unsigned size;
 {
-	kprintf("To be implemented!\n");
+	STATWORD ps;
+	disable(ps);
+
+	unsigned top;
+	struct pentry *pptr;
+	struct mblock *p, *q;
+	size = (unsigned)roundmb(size);
+
+	if(size == 0){
+		restore(ps);
+		return(SYSERR);
+	}
+
+	if(((unsigned)block+size) > (proctab[currpid].vmemlist)->mnext){
+		restore(ps);
+		return(SYSERR);
+	}
+	else if(((unsigned)block) < ((unsigned) &end)){
+		restore(ps);
+		return SYSERR;
+	}
+
+	if((((unsigned)block+size) == (proctab[currpid].vmemlist)->mnext)){
+		
+		proctab[currpid].vmemlist->mlen += size; 
+		proctab[currpid].vmemlist->mnext = (unsigned)block;
+		
+		restore(ps);
+		return OK;
+	}
+	else if(((unsigned)block+size) < (proctab[currpid].vmemlist)->mnext){
+		
+		proctab[currpid].vmemlist->mlen += size; 
+		proctab[currpid].vmemlist->mnext = proctab[currpid].vmemlist->mnext - size;
+		
+		restore(ps);
+		return OK;
+	}
 	return(OK);
 }
