@@ -92,10 +92,34 @@ SYSCALL get_frm(int* avail)
       return OK;
 		}
 	}
+
+  if(page_replace_policy == SC){
+
+    *avail = SC_replace();
+    restore(ps);
+    return OK;
+  }
+
+  if(page_replace_policy == LFU){
+    int n = LFU_replace();
+    free_frm(n);
+    *avail = n;
+
+    restore(ps);
+    return OK;
+  }
   restore(ps);
   /* if there is no unmapped frame available, then it should return error */
   return SYSERR;
 }
+
+
+int SC_replace(){
+
+  
+
+}
+
 
 /*-------------------------------------------------------------------------
  * free_frm - free a frame 

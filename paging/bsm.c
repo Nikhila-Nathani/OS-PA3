@@ -207,11 +207,15 @@ SYSCALL bsm_unmap(int pid, int vpno, int flag)
 
                 /* if the frame is mapped, then move the page table to bs   */
                 write_bs(pt_off->pt_base * 4096, store, pageth);
+                frm_tab[(pt_off->pt_base) - FRAME0].fr_refcnt--;
 
-               // delete_from_sc_q(pt_off->pt_base - FRAME0);
+                if(frm_tab[(pt_off->pt_base) - FRAME0].fr_refcnt <= 0){
+                 
 
-                /* free the frame   */
-                free_frm(pt_off->pt_base - FRAME0);
+                    /* free the frame   */
+                    free_frm(pt_off->pt_base - FRAME0);
+                    // delete_from_sc_q(pt_off->pt_base - FRAME0);
+                }    
             }
         }
         next++;
