@@ -61,8 +61,19 @@ typedef struct{
   int fr_dirty;
 }fr_map_t;
 
+typedef struct{
+  int pc_prev;
+  int pc_next;
+}page_circular_queue;
+
 extern bs_map_t bsm_tab[];
 extern fr_map_t frm_tab[];
+
+extern page_circular_queue pc_q[];
+extern pc_flag;
+extern pc_tail;
+extern pc_curr;
+
 /* Prototypes for required API calls */
 SYSCALL xmmap(int, bsd_t, int);
 SYSCALL xunmap(int);
@@ -91,7 +102,7 @@ SYSCALL write_bs(char *, bsd_t, int);
 #define FR_DIR		2
 
 #define SC 3
-#define FIFO 4
+#define LFU 4
 
 #define BACKING_STORE_BASE	0x00800000
 #define BACKING_STORE_UNIT_SIZE 0x00080000  /* this is to be changed as each backing store has 128 pages: 128 * 4 kb = 524288 bytes */

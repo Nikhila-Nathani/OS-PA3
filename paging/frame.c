@@ -62,7 +62,18 @@ void init_entries(int i){
   }
 }
 
+void reinit_frm(int n){
+  /* if not global PT or PD	*/
+  if(n < 6){
+    return OK;
+  }
 
+  frm_tab[n].fr_status = FRM_UNMAPPED;
+  frm_tab[n].fr_type = FR_PAGE;
+  frm_tab[n].fr_refcnt = 0;
+  
+  return OK;
+}
 /*-------------------------------------------------------------------------
  * get_frm - get a free frame according page replacement policy
  *-------------------------------------------------------------------------
