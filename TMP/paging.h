@@ -62,8 +62,8 @@ typedef struct{
 }fr_map_t;
 
 typedef struct{
-  int pc_prev;
-  int pc_next;
+  int prev;
+  int next;
 }page_circular_queue;
 
 extern bs_map_t bsm_tab[];

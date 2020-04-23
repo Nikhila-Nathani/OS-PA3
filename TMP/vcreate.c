@@ -64,10 +64,10 @@ SYSCALL vcreate(procaddr,ssize,hsize,priority,name,nargs,args)
 
 		struct mblock *vheaplist; 
 		
-		proctab[p_id].vmemlist->mlen = hsize*4096;
-		proctab[p_id].vmemlist->mnext = 4096 * 4096;
+		proctab[pid].vmemlist->mlen = hsize*4096;
+		proctab[pid].vmemlist->mnext = 4096 * 4096;
 
-		vheaplist = BACKING_STORE_BASE + (bs_id * BACKING_STORE_UNIT_SIZE);
+		vheaplist = BACKING_STORE_BASE + (bsid * BACKING_STORE_UNIT_SIZE);
 		
 		vheaplist->mlen = hsize*NBPG;
 		vheaplist->mnext = NULL;

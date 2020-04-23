@@ -39,7 +39,7 @@ int get_bs(bsd_t bs_id, unsigned int npages) {
   }
 
   if(bsm_tab[bs_id].shared_pages < npages ){
-    retore(ps);
+    restore(ps);
     return bsm_tab[bs_id].shared_pages;
   }
   /* add process to shared backing store  */
